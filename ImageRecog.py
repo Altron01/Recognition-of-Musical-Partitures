@@ -119,6 +119,25 @@ def separate(img):
     return vec
     pass
 
+def PentagramDeleter(img):
+    img2 = np.copy(img)
+    img2 = cv2.bitwise_not(img2)
+    minLineLength = 50
+    maxLineGap = 1
+    vote=int(img2.shape[1]/1.7)
+    lines = cv2.HoughLinesP(img2,1,np.pi/180,vote,minLineLength,maxLineGap)
+    for x in range(0, lines.shape[0]):
+        for x1,y1,x2,y2 in lines[x]:
+            cv2.line(img2,(x1,y1),(x2,y2),(0,255,255),1)
+    img2 = cv2.bitwise_not(img2)
+    linesb=np.sort(lines,axis=0)
+    linesb=linesb.reshape(lines.shape[0],lines.shape[2])
+    for i in range(linesb.shape[0]):
+        for j in range(0,img2.shape[1]):
+            if img2[linesb[i][1]][j]==255 and img2[linesb[i][1]-1][j]==0:
+                img2[linesb[i][1]][j]=0
+    return img2
+
 #dataSetDir, dataSetSeparatedDir, imgName
 def prec(dataSetDir, dataSetSeparatedDir, imgName):
     #Leer raw image en folder
@@ -128,7 +147,7 @@ def prec(dataSetDir, dataSetSeparatedDir, imgName):
     
     #Clean image from noise and stuff
     binarize(container)
-    
+    container=PentagramDeleter(container)
     #Cleaner Algorithm here
     stime = time.time()
     #averageCleaner(container)#13
